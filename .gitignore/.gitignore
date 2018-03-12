@@ -1,0 +1,6 @@
+AltDS/bin/
+AltDS/obj/
+packages/
+.vs/
+*.suo
+*.txt
