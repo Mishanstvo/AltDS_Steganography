@@ -24,6 +24,8 @@ namespace AltDS
         System.IO.DirectoryInfo info;
         System.IO.DirectoryInfo[] dirs;
         System.IO.FileInfo[] files;
+        string[] all;
+        int c = 0;
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -39,17 +41,39 @@ namespace AltDS
                 MessageBox.Show("В выбранной папке нет файлов!");
                 button2.Enabled = false;
                 button3.Enabled = false;
+                checkBox2.Enabled = false;
             }
             else
             {
                 button2.Enabled = true;
                 button3.Enabled = true;
-              
-                numericUpDown1.Maximum = files.Count();
+                checkBox2.Enabled = true;
+                c = 0;
+                all = new string[files.Count() + dirs.Count()];
+                ///////////////////////Добавление файлов единый массив////////////////
+                for (; c < files.Count(); c++)
+                {
+                    all[c] = Convert.ToString(files[c]);
+
+                }
+                ///////////////////////Добавление файлов единый массив////////////////
+                ///////////////////////Добавление папок единый массив////////////////          
+                    for (int b = 0; b < dirs.Count(); b++)
+                    {
+                        all[c] = Convert.ToString(dirs[b]);
+                        c++;
+                    }
+                ///////////////////////Добавление папок единый массив////////////////
+                if (checkBox2.Checked == true)
+                {
+                    numericUpDown1.Maximum = all.Count();
+                }
+                else
+                {
+                    numericUpDown1.Maximum = all.Count() - dirs.Count();
+                }
             }
         }
-
-        int abc;
         List<string> Divider(string str, int blockLength)
         {
             ///////////////Очистка AltDS////////////
@@ -59,25 +83,27 @@ namespace AltDS
                 foreach (AlternateDataStreamInfo s in file.ListAlternateDataStreams())
                 {
                     s.Delete();
+                }             
+            }
+            for (int i = 0; i < dirs.Count(); i++)
+            {
+                DirectoryInfo dir = new DirectoryInfo(path + Convert.ToString(dirs[i]));
+                foreach (AlternateDataStreamInfo s in dir.ListAlternateDataStreams())
+                {
+                    s.Delete();
                 }
             }
+    
             //////////////Очистка AltDS/////////////
             int count = 0;
             List<string> Blocks = new List<string>(str.Length / blockLength + 1);
  
                     for (int i = 0; i < str.Length; i += blockLength)
             {
-                //   Blocks.Add(str.Substring(i, str.Length - i > blockLength ? blockLength : str.Length - i));
-                WriteAlternateStream(path + files[count] + ":" + count + ".txt", str.Substring(i, str.Length - i > blockLength ? blockLength : str.Length - i));
+                WriteAlternateStream(path + all[count] + ":" + count + ".txt", str.Substring(i, str.Length - i > blockLength ? blockLength : str.Length - i));
                 count++;
             }
-
-            //for (int q = 0; q < 3; q++)
-            //{
-            //    WriteAlternateStream("C:\\Users\\Администратор\\Desktop\\123AltDS\\" + q + ".txt:" + q + ".txt", Convert.ToString(Blocks[q]));
-            //}
             return Blocks;
-
         }
         public void button2_Click(object sender, EventArgs e)
         {
@@ -135,23 +161,27 @@ namespace AltDS
                 FileInfo file = new FileInfo(path + Convert.ToString(files[i]));
                 foreach (AlternateDataStreamInfo s in file.ListAlternateDataStreams())
                 {
-                    // MessageBox.Show(s.Name + "" + s.Size);
-                    // MessageBox.Show(s.FullPath);
-                    // MessageBox.Show(s.ToString());
-                    /////////////
                     AlternateDataStreamInfo r = file.GetAlternateDataStream(s.Name,FileMode.Open);
                     using (TextReader reader = r.OpenText())
                     {                      
                            encrypttext += reader.ReadToEnd();                   
-                    }
-                 
+                    }        
                         listBox1.Items.Add(s.Name + " " + s.Size+" B "+ s.StreamType);
-                  
-                    //    s.Delete();
-                    /////////////////
                 }
-              
-
+            }
+            for (int i = 0; i < dirs.Count(); i++)
+            {
+                DirectoryInfo dir = new DirectoryInfo(path + Convert.ToString(dirs[i]));
+                foreach (AlternateDataStreamInfo s in dir.ListAlternateDataStreams())
+                {
+                    AlternateDataStreamInfo r = dir.GetAlternateDataStream(s.Name, FileMode.Open);
+                    using (TextReader reader = r.OpenText())
+                    {
+                        encrypttext += reader.ReadToEnd();
+                    }
+                    listBox1.Items.Add(s.Name + " " + s.Size + " B " + s.StreamType);
+                
+            }
             }
             if ((checkBox1.Checked == true) && (textBox3.Text != ""))
             {
@@ -181,6 +211,18 @@ namespace AltDS
             else
             {
                 textBox3.Enabled = false;
+            }
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked == true)
+            {    
+                    numericUpDown1.Maximum = all.Count();           
+            }
+            else
+            {
+                    numericUpDown1.Maximum = all.Count() - dirs.Count();  
             }
         }
     }
