@@ -36,8 +36,9 @@ namespace AltDS
             info = new System.IO.DirectoryInfo(path);
             dirs = info.GetDirectories();
             files = info.GetFiles();
-            if (files.Count() == 0)
+            if (files.Count()+dirs.Count() == 0)
             {
+             
                 MessageBox.Show("В выбранной папке нет файлов!");
                 button2.Enabled = false;
                 button3.Enabled = false;
@@ -45,6 +46,7 @@ namespace AltDS
             }
             else
             {
+              
                 button2.Enabled = true;
                 button3.Enabled = true;
                 checkBox2.Enabled = true;
@@ -71,6 +73,12 @@ namespace AltDS
                 else
                 {
                     numericUpDown1.Maximum = all.Count() - dirs.Count();
+                }
+                if (files.Count() == 0)
+                {
+                    checkBox2.Checked = true;
+                    numericUpDown1.Value = dirs.Count();
+
                 }
             }
         }
